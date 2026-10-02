@@ -12,7 +12,6 @@
 #include "eyes.h"
 #include "debug_serial.h"
 
-// Estados de la maquina de arranque y marca de tiempo de su ventana
 bool bootComplete = false;
 unsigned long bootTime = 0;
 
@@ -20,33 +19,28 @@ void setup() {
   Serial.begin(115200);
   Serial.println(F("[BOOT] sistema de ojos OLED"));
 
-  // TODO 1.5 (Reto 01)
+  // Reto 01: Inicialización de bus I2C
   initI2C();
   scanI2C();
   testI2CDevice();
 
-  // TODO 2.4: Escribe las llamadas de los pasos 5 y 6 para pintar el logo y ejecutar el POST de pantalla
-  // Paso 5 - Panel inicializado
+  // Reto 02: Inicialización de pantalla, POST y Logo
   initDisplay();
-
-  // Paso 6 - Logo pintado y POST de pantalla
   testDisplay();
-  delay(500); // Pausa breve de 500 ms para visibilidad de la autoprueba POST
+  delay(500);
   showLogo();
 
-  // Guardar marca de tiempo del inicio del estado BOOT
+  // Reto 03: Inicialización de los ojos
+  initEyes();
+
   bootTime = millis();
 
-  // TODO 3.4 (Retos posteriores)
-  // Paso 7 - Ojos inicializados
-
-  // TODO 4.3 (Retos posteriores)
-  // Paso 8 - Ayuda publicada y ventana de arranque armada
+  // TODO 4.3: Paso 8 - Ayuda publicada al finalizar el arranque
+  printHelp();
 }
 
 void loop() {
-  // TODO 2.4 (continuación): Mientras la ventana de arranque no expire, mantén el logo
-  // en pantalla; al meceder/expirar, cambia de estado y repórtalo por el monitor.
+  // Ventana de arranque (FSM: Estado BOOT)
   if (!bootComplete) {
     if (millis() - bootTime >= LOGO_TIME_MS) {
       bootComplete = true;
@@ -54,9 +48,10 @@ void loop() {
     } else {
       showLogo();
     }
-    return; // Sale del loop mientras siga en BOOT para no ejecutar lógica de RUN
+    return;
   }
 
-  // TODO 4.3 (continuación): Con el arranque terminado, atiende la consola en cada
-  // vuelta y deja que la animación avance un paso sin bloquear el bucle.
+  // Estado RUN: Atención continua a la consola y animación de los ojos sin bloqueo
+  debugSerialTick();
+  updateEyes();
 }

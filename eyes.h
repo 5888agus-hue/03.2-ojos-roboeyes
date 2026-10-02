@@ -20,22 +20,77 @@
 // Instancia global: el sistema tiene un solo par de ojos
 RoboEyes<Adafruit_SSD1306> roboEyes(display);
 
-// TODO 3.1: Inicializa los ojos con las dimensiones del panel y el objetivo de cuadros por segundo de config.h.
-// Pregunta Guía: ¿Qué tres números necesita la inicialización y de dónde sale cada uno?
+// TODO 3.1: Inicializa los ojos con las dimensiones del panel y el objetivo de cuadros por segundo
 inline void initEyes() {
-    /* ESCRIBE TU CÓDIGO AQUÍ */
+  // Tres parámetros: Ancho del panel, Alto del panel y FPS objetivo (60)
+  roboEyes.begin(OLED_WIDTH, OLED_HEIGHT, 60);
+  Serial.println(F("[EYES] RoboEyes listo a 60 fps"));
 }
 
-// TODO 3.2: Avanza la animación un paso sin bloquear; nunca envuelvas este paso en borrado/presentación ni en esperas.
-// Pregunta Guía: ¿Quién es dueño del borrado y la presentación del cuadro, tu código o la librería?
+// TODO 3.2: Avanza la animación un paso sin bloquear
 inline void updateEyes() {
-    /* ESCRIBE TU CÓDIGO AQUÍ */
+  // La librería es dueña del borrado y la presentación del cuadro
+  roboEyes.update();
 }
 
-// TODO 3.3: Aplica la expresión pedida por tecla (1 a 7) y restablece la base limpia antes de calibrar.
-// Pregunta Guía: ¿Qué cambia en pantalla entre una tecla y otra si la base no se restablece?
+// TODO 3.3: Aplica la expresión pedida por tecla (1 a 7) y restablece la base limpia
 inline void setEyesMood(char key) {
-    /* ESCRIBE TU CÓDIGO AQUÍ */
+  // Validación de rango
+  if (key < '1' || key > '7') {
+    return;
+  }
+
+  // --- RESTABLECER BASE LIMPIA ---
+  roboEyes.setCuriosity(OFF);
+  roboEyes.setHFlicker(OFF, 0);
+  roboEyes.setVFlicker(OFF, 0);
+  roboEyes.setAutoblinker(ON, 4, 2);
+  roboEyes.setIdleMode(OFF);
+
+  // --- MAPA DE EXPRESIONES (1 A 7) ---
+  switch (key) {
+    case '1': // Neutra
+      roboEyes.setMood(DEFAULT);
+      roboEyes.setIdleMode(ON);
+      break;
+
+    case '2': // Feliz
+      roboEyes.setMood(HAPPY);
+      roboEyes.setIdleMode(ON);
+      break;
+
+    case '3': // Enojada
+      roboEyes.setMood(ANGRY);
+      roboEyes.setIdleMode(OFF);
+      break;
+
+    case '4': // Cansada
+      roboEyes.setMood(TIRED);
+      roboEyes.setIdleMode(OFF);
+      break;
+
+    case '5': // Soñolienta
+      roboEyes.setMood(TIRED);
+      roboEyes.setAutoblinker(ON, 1, 1);
+      roboEyes.setIdleMode(OFF);
+      break;
+
+    case '6': // Temible
+      roboEyes.setMood(ANGRY);
+      roboEyes.setAutoblinker(OFF, 0, 0);
+      roboEyes.setVFlicker(ON, 2);
+      roboEyes.setIdleMode(OFF);
+      break;
+
+    case '7': // Curiosa
+      roboEyes.setMood(DEFAULT);
+      roboEyes.setCuriosity(ON);
+      roboEyes.setIdleMode(ON, 2, 2);
+      break;
+  }
+
+  Serial.print(F("[EYES] expresion aplicada: "));
+  Serial.println(key);
 }
 
 #endif
